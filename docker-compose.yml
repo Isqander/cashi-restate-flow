@@ -38,13 +38,16 @@ services:
     depends_on:
       - restate
       - fee-service
-    entrypoint: >
-      sh -c "
-        sleep 10 &&
-        curl -f -X POST http://restate:9070/deployments
-          -H 'content-type: application/json'
-          -d '{\"uri\": \"http://fee-service:9080\"}'
-      "
+    entrypoint:
+      - sh
+      - -c
+      - |
+        until curl -sf http://restate:9070/health; do
+          echo "Waiting for Restate..."; sleep 3;
+        done
+        curl -sf -X POST http://restate:9070/deployments \
+          -H 'content-type: application/json' \
+          -d '{"uri": "http://fee-service:9080"}'
     restart: on-failure
 
 volumes:
