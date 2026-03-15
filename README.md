@@ -48,12 +48,12 @@ This starts:
 
 ### API Endpoints
 
-All requests go through Restate ingress at `http://localhost:8080`.
+All requests go through Restate ingress at `http://localhost:8082`.
 
 #### Process a fee
 
 ```bash
-curl -X POST http://localhost:8080/FeeWorkflow/txn_001/run \
+curl -X POST http://localhost:8082/FeeWorkflow/txn_001/run \
   -H 'content-type: application/json' \
   -d '{
     "transactionId": "txn_001",
@@ -82,7 +82,7 @@ Response:
 #### Check workflow status
 
 ```bash
-curl -X POST http://localhost:8080/FeeWorkflow/txn_001/getStatus
+curl -X POST http://localhost:8082/FeeWorkflow/txn_001/getStatus
 ```
 
 #### Query fee by transaction ID _(extra)_
@@ -90,7 +90,7 @@ curl -X POST http://localhost:8080/FeeWorkflow/txn_001/getStatus
 > Not required by the spec — added as a bonus feature via `FeeService`.
 
 ```bash
-curl -X POST http://localhost:8080/FeeService/byTransactionId \
+curl -X POST http://localhost:8082/FeeService/byTransactionId \
   -H 'content-type: application/json' \
   -d '"txn_001"'
 ```
@@ -98,7 +98,7 @@ curl -X POST http://localhost:8080/FeeService/byTransactionId \
 #### Query all fees _(extra)_
 
 ```bash
-curl -X POST http://localhost:8080/FeeService/allFees
+curl -X POST http://localhost:8082/FeeService/allFees
 ```
 
 ## Testing
