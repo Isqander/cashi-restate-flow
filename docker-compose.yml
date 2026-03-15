@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: feeservice
+      POSTGRES_USER: feeservice
+      POSTGRES_PASSWORD: feeservice
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U feeservice"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  fee-service:
+    build: .
+    ports:
+      - "9080:9080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/feeservice
+      DB_USER: feeservice
+      DB_PASSWORD: feeservice
+
+  restate:
+    image: docker.restate.dev/restatedev/restate:latest
+    ports:
+      - "8080:8080"
+      - "9070:9070"
+    depends_on:
+      - fee-service
+    environment:
+      RESTATE_OBSERVABILITY__LOG__FILTER: "restate=info"
+
+  register:
+    image: docker.restate.dev/restatedev/restate-cli:latest
+    depends_on:
+      - restate
+      - fee-service
+    entrypoint: >
+      sh -c "
+        sleep 5 &&
+        restate -y --url http://restate:9070 deployments register http://fee-service:9080
+      "
+    restart: "no"
+
+volumes:
+  postgres_data:
