@@ -32,22 +32,18 @@ services:
       - fee-service
     environment:
       RESTATE_OBSERVABILITY__LOG__FILTER: "restate=info"
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:9070/health || exit 1"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
 
   register:
     image: docker.restate.dev/restatedev/restate-cli:latest
     depends_on:
-      restate:
-        condition: service_healthy
+      - restate
+      - fee-service
     entrypoint: >
       sh -c "
+        sleep 10 &&
         restate -y --url http://restate:9070 deployments register http://fee-service:9080
       "
-    restart: "no"
+    restart: on-failure
 
 volumes:
   postgres_data:
