@@ -42,6 +42,7 @@ services:
       - fee-service
     environment:
       RESTATE_OBSERVABILITY__LOG__FILTER: "restate=info"
+      RESTATE_INGRESS__ADVERTISED_INGRESS_ENDPOINT: "https://api.cashi.aistithy.com"
 
   register:
     image: curlimages/curl:latest
