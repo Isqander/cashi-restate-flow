@@ -1,6 +1,12 @@
+networks:
+  fee-net:
+    driver: bridge
+
 services:
   postgres:
     image: postgres:16-alpine
+    networks:
+      - fee-net
     environment:
       POSTGRES_DB: feeservice
       POSTGRES_USER: feeservice
@@ -15,6 +21,8 @@ services:
 
   fee-service:
     build: .
+    networks:
+      - fee-net
     depends_on:
       postgres:
         condition: service_healthy
@@ -25,6 +33,8 @@ services:
 
   restate:
     image: docker.restate.dev/restatedev/restate:latest
+    networks:
+      - fee-net
     ports:
       - "8082:8080"
       - "9070:9070"
@@ -35,6 +45,8 @@ services:
 
   register:
     image: curlimages/curl:latest
+    networks:
+      - fee-net
     depends_on:
       - restate
       - fee-service
@@ -42,10 +54,10 @@ services:
       - sh
       - -c
       - |
-        until curl -sf http://restate:9070/health; do
+        until curl -s -o /dev/null http://restate:9070; do
           echo "Waiting for Restate..."; sleep 3;
         done
-        curl -sf -X POST http://restate:9070/deployments \
+        curl -s -X POST http://restate:9070/deployments \
           -H 'content-type: application/json' \
           -d '{"uri": "http://fee-service:9080"}'
     restart: on-failure
